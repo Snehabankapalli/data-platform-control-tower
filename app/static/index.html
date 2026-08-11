@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A portfolio-ready operations dashboard for pipeline health, data lineage, incidents, and cloud cost optimization.">
+  <title>Data Platform Control Tower</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>CONTROL</strong><small>TOWER</small></span>
+      </div>
+      <nav>
+        <a class="nav-item active" href="#overview" aria-current="page"><span aria-hidden="true">⌂</span> Overview</a>
+        <a class="nav-item" href="#pipelines"><span aria-hidden="true">⇄</span> Pipelines</a>
+        <a class="nav-item" href="#incidents"><span aria-hidden="true">!</span> Incidents <em id="nav-incident-count">—</em></a>
+        <a class="nav-item" href="#costs"><span aria-hidden="true">$</span> Cloud costs</a>
+        <a class="nav-item" href="#lineage"><span aria-hidden="true">⌘</span> Lineage</a>
+      </nav>
+      <div class="sidebar-meta">
+        <span class="live-dot" aria-hidden="true"></span>
+        <div><strong>Demo environment</strong><small>Generated telemetry</small></div>
+      </div>
+    </aside>
+
+    <main id="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Platform operations / Overview</p>
+          <h1>Good afternoon, Sneha.</h1>
+          <p class="lede">Your platform is processing normally. Two incidents need attention.</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="freshness"><span class="live-dot" aria-hidden="true"></span><span>Live</span><time id="last-updated">Loading…</time></div>
+          <button class="icon-button" id="refresh-button" type="button" aria-label="Refresh dashboard">↻</button>
+        </div>
+      </header>
+
+      <div id="error-banner" class="error-banner" role="alert" hidden>
+        <strong>Dashboard unavailable.</strong> <span id="error-message">Try refreshing the page.</span>
+      </div>
+
+      <div id="loading-state" class="loading-state" aria-busy="true" aria-label="Loading platform telemetry">
+        <div class="skeleton wide"></div><div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+
+      <div id="dashboard" hidden>
+        <section id="overview" aria-labelledby="overview-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">At a glance</p><h2 id="overview-title">Platform health</h2></div>
+            <span class="window-label">Last 24 hours</span>
+          </div>
+          <div class="metrics-grid" id="metrics-grid"></div>
+        </section>
+
+        <section class="split-grid" aria-label="Operations summary">
+          <article class="panel pipeline-panel" id="pipelines">
+            <div class="panel-header">
+              <div><p class="eyebrow">Workloads</p><h2>Pipeline health</h2></div>
+              <div class="filters">
+                <label><span class="sr-only">Search pipelines</span><input id="pipeline-search" type="search" placeholder="Search pipelines"></label>
+                <label><span class="sr-only">Filter by status</span><select id="status-filter"><option value="">All statuses</option><option value="healthy">Healthy</option><option value="degraded">Degraded</option><option value="failed">Failed</option></select></label>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th scope="col">Pipeline</th><th scope="col">Status</th><th scope="col">Freshness</th><th scope="col">Success</th><th scope="col">Volume</th></tr></thead>
+                <tbody id="pipeline-rows"></tbody>
+              </table>
+              <p id="pipeline-empty" class="empty-state" hidden>No pipelines match these filters.</p>
+            </div>
+          </article>
+
+          <article class="panel incident-panel" id="incidents">
+            <div class="panel-header">
+              <div><p class="eyebrow">Response queue</p><h2>Active incidents</h2></div>
+              <span class="critical-label">Operator action</span>
+            </div>
+            <div id="incident-list" class="incident-list"></div>
+          </article>
+        </section>
+
+        <section class="split-grid costs-lineage">
+          <article class="panel cost-panel" id="costs">
+            <div class="panel-header">
+              <div><p class="eyebrow">FinOps</p><h2>Cloud spend</h2></div>
+              <div class="cost-total"><small>Month to date</small><strong id="month-cost">—</strong></div>
+            </div>
+            <div id="cost-chart" class="cost-chart" role="img" aria-label="Seven-day Snowflake and AWS cost chart"></div>
+            <div class="chart-legend"><span><i class="legend-snowflake"></i>Snowflake</span><span><i class="legend-aws"></i>AWS</span></div>
+            <div class="recommendation-heading"><h3>Optimization opportunities</h3><span id="savings-total">—</span></div>
+            <div id="cost-recommendations" class="recommendations"></div>
+          </article>
+
+          <article class="panel lineage-panel" id="lineage">
+            <div class="panel-header">
+              <div><p class="eyebrow">Impact analysis</p><h2>Live lineage</h2></div>
+              <span class="incident-path"><i></i> Incident path</span>
+            </div>
+            <div id="lineage-graph" class="lineage-graph" role="img" aria-label="Data lineage from sources through ingestion and transformation to consumers"></div>
+            <p class="lineage-note"><span aria-hidden="true">↳</span> Incident propagation highlights affected downstream assets.</p>
+          </article>
+        </section>
+      </div>
+      <footer><span>Control Tower v1.0</span><span>FastAPI · Immutable domain model · Approval-gated remediation</span><a href="/api/docs">API docs ↗</a></footer>
+    </main>
+  </div>
+
+  <dialog id="incident-dialog" aria-labelledby="dialog-title">
+    <form method="dialog">
+      <button class="dialog-close" value="cancel" aria-label="Close incident details">×</button>
+      <p class="eyebrow">Incident response</p>
+      <h2 id="dialog-title">Incident details</h2>
+      <div id="dialog-content"></div>
+      <div class="dialog-actions">
+        <button class="secondary-button" value="cancel">Cancel</button>
+        <button class="primary-button" id="approve-button" value="approve" type="button">Approve remediation</button>
+      </div>
+      <p class="approval-note">Approval is recorded in the incident audit log. No cloud command is executed in demo mode.</p>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
